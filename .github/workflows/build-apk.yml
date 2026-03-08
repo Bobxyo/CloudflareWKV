@@ -24,17 +24,17 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Download Missing Wrapper Files
-        # 使用 wget 直接从官方下载缺失的脚本和依赖包，绕过 Gradle 版本的兼容性检查
+      - name: Fix and Download Wrapper
         run: |
+          # 强制重新下载对应版本的 Wrapper
           wget -q https://raw.githubusercontent.com/gradle/gradle/master/gradlew
           mkdir -p gradle/wrapper
           wget -q -O gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/master/gradle/wrapper/gradle-wrapper.jar
           chmod +x gradlew
 
       - name: Build with Gradle
-        # 此时会读取你项目自带的 gradle-wrapper.properties 去下载正确的旧版 Gradle 并编译
-        run: ./gradlew assembleDebug
+        # 使用 --no-daemon 模式在 Actions 环境下更稳定
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
