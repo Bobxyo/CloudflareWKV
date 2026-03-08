@@ -3,11 +3,16 @@ name: Build KVideo APK
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch: # 支持手动点击按钮构建
+  workflow_dispatch: 
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # 设置全局工作目录，这样下面的所有步骤都会在这个文件夹下运行
+    defaults:
+      run:
+        working-directory: android-tv 
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -29,4 +34,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: KVideo-TV-Debug
-          path: app/build/outputs/apk/debug/*.apk
+          # 注意：这里的路径也要加上前缀，或者使用通配符
+          path: android-tv/app/build/outputs/apk/debug/*.apk
