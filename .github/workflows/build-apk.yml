@@ -9,7 +9,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
-    # 关键配置：全局指定工作目录为 android-tv
     defaults:
       run:
         working-directory: android-tv 
@@ -25,20 +24,20 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Force Generate Gradle Wrapper
-        # 这一步会调用云端的全局 Gradle，为你自动补全缺失的 gradlew 和 jar 文件
-        run: gradle wrapper
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Download Missing Wrapper Files
+        # 使用 wget 直接从官方下载缺失的脚本和依赖包，绕过 Gradle 版本的兼容性检查
+        run: |
+          wget -q https://raw.githubusercontent.com/gradle/gradle/master/gradlew
+          mkdir -p gradle/wrapper
+          wget -q -O gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/master/gradle/wrapper/gradle-wrapper.jar
+          chmod +x gradlew
 
       - name: Build with Gradle
-        # 开始构建 APK
+        # 此时会读取你项目自带的 gradle-wrapper.properties 去下载正确的旧版 Gradle 并编译
         run: ./gradlew assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: KVideo-TV-Debug
-          # 产物上传路径需要从仓库根目录开始算起
           path: android-tv/app/build/outputs/apk/debug/*.apk
